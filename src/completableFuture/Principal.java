@@ -9,29 +9,12 @@ public class Principal {
         mostrarResultado(15);
         futurosCombinados("Groovy");
         enviarFuturos("Kotlin");
+        multiplesFuturos();
     }
 
     public static String obtenerResultadoSegundoFuture(){
-        CompletableFuture<String> completableFuture = CompletableFuture.supplyAsync(() -> {
-            System.out.println("Empezando primer future");
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } finally {
-                return "satisfactoriamente";
-            }
-        });
-        CompletableFuture<String> future = completableFuture.thenApply(x -> {
-            System.out.println("Empezando segundo future");
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }finally {
-                return "Resultado del primer future:"+x;
-            }
-        });
+        CompletableFuture<String> completableFuture = CompletableFuture.supplyAsync(() -> "Satisfactoriamente");
+        CompletableFuture<String> future = completableFuture.thenApply(x -> "Resultado del primer future:"+x);
         try {
             return future.get();
         } catch (InterruptedException e) {
@@ -43,20 +26,8 @@ public class Principal {
     }
 
     public static void mostrarResultado(int numero){
-        CompletableFuture<Integer> completableFuture = CompletableFuture.supplyAsync(() -> {
-            System.out.println("Empezando tarea");
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }finally {
-                return numero*numero;
-            }
-        });
-        //thenAccept recibe el valor de completable y no retorna un valor
-        CompletableFuture<Void> future = completableFuture.thenAccept(x -> {
-            System.out.println("Resultado:"+x);
-        });
+        CompletableFuture<Integer> completableFuture = CompletableFuture.supplyAsync(() -> numero*numero);
+        CompletableFuture<Void> future = completableFuture.thenAccept(x -> System.out.println("Resultado:"+x));
         try {
             future.get();
         } catch (InterruptedException e) {
@@ -84,6 +55,44 @@ public class Principal {
                                                                                                     (x,y) -> System.out.println(x+y));
         try {
             future.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void multiplesFuturos(){
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }finally {
+                System.out.println("Future 1");
+            }
+        });
+        CompletableFuture<Void> future2 = CompletableFuture.runAsync(() ->{
+            try {
+                Thread.sleep(4000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }finally {
+                System.out.println("Future 2");
+            }
+        });
+        CompletableFuture<Void> future3 = CompletableFuture.runAsync(() -> {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }finally {
+                System.out.println("Future 3");
+            }
+        });
+        CompletableFuture<Void> futuros = CompletableFuture.allOf(future,future2,future3);
+        try {
+            futuros.get();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {

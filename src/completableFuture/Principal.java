@@ -8,6 +8,7 @@ public class Principal {
         System.out.println(obtenerResultadoSegundoFuture());
         mostrarResultado(15);
         futurosCombinados("Groovy");
+        enviarFuturos("Kotlin");
     }
 
     public static String obtenerResultadoSegundoFuture(){
@@ -78,4 +79,15 @@ public class Principal {
         }
     }
 
+    public static void enviarFuturos(String nombre){
+        CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> "La palabra " + nombre).thenAcceptBoth(CompletableFuture.supplyAsync(()-> " tiene " + nombre.length() + " letras"),
+                                                                                                    (x,y) -> System.out.println(x+y));
+        try {
+            future.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
 }
